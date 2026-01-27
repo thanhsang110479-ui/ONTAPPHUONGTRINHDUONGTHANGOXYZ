@@ -1,0 +1,875 @@
+<!doctype html>
+<html lang="vi">
+<head>
+<meta charset="utf-8"/>
+<meta name="viewport" content="width=device-width, initial-scale=1"/>
+<title>ÔN TẬP PHƯƠNG TRÌNH ĐƯỜNG THẲNG TRONG KHÔNG GIAN - TẠO BỞI MR SANG</title>
+
+<style>
+
+  :root {
+    --bg1:#1f3243;
+    --bg2:#22435c;
+    --card:rgba(255,255,255,.08);
+    --line:rgba(255,255,255,.14);
+    --text:#eaf4ff;
+    --muted:rgba(234,244,255,.78);
+    --green:#19c37d;
+    --orange:#ff8a00;
+    --orange2:#ffb14a;
+    --bad:#ff4d4f;
+  }
+  *{box-sizing:border-box}
+  body{
+    margin:0;
+    font-family: system-ui, -apple-system, "Segoe UI", Roboto, Arial, sans-serif;
+    color:var(--text);
+    background:
+      radial-gradient(900px 500px at 15% 0%, rgba(25,195,125,.35), transparent 55%),
+      radial-gradient(900px 520px at 85% 10%, rgba(255,138,0,.35), transparent 55%),
+      linear-gradient(180deg, var(--bg2), var(--bg1));
+    min-height:100vh;
+  }
+  .wrap{max-width:980px;margin:0 auto;padding:18px 14px 28px}
+  .topbar{
+    display:flex;align-items:center;justify-content:space-between;gap:12px;
+    padding:14px 16px;border:1px solid var(--line);border-radius:18px;
+    background:linear-gradient(135deg, rgba(0,120,255,.95), rgba(0,180,255,.95));
+    box-shadow:0 14px 40px rgba(0,0,0,.25);
+  }
+  /* Topbar blue + white text (only this area) */
+  .topbar .title h1,
+  .topbar .sub,
+  .topbar .pill{ color:#ffffff !important; }
+  .topbar .pill{
+    border-color: rgba(255,255,255,.35) !important;
+    background: rgba(255,255,255,.18) !important;
+  }
+
+  /* Title text on orange topbar only */
+  .topbar .title h1, .topbar .title .sub{color:#0b2a6a;}
+
+  .title{display:flex;flex-direction:column;gap:4px}
+  .title h1{margin:0;font-size:18px;letter-spacing:.2px}
+  .title .sub{font-size:12px;color:var(--muted)}
+  .pill{
+    font-size:12px;border:1px solid var(--line);border-radius:999px;
+    padding:8px 10px;background:rgba(0,0,0,.15);color:var(--muted);
+    white-space:nowrap;
+  }
+  .grid{display:grid;grid-template-columns:1fr;gap:14px;margin-top:14px}
+  @media (max-width: 900px){ .grid{grid-template-columns:1fr} }
+  .card{
+    border:1px solid var(--line);border-radius:18px;padding:16px;
+    background:linear-gradient(180deg, rgba(255,255,255,.06), rgba(255,255,255,.03));
+    box-shadow:0 14px 40px rgba(0,0,0,.25);
+  }
+  .btn{
+    border:1px solid rgba(255,255,255,.18);
+    border-radius:14px;padding:10px 12px;
+    background:linear-gradient(180deg, rgba(255,255,255,.10), rgba(255,255,255,.02));
+    color:var(--text);cursor:pointer;transition:.12s transform, .12s filter;
+    user-select:none;
+  }
+  .btn:hover{transform:translateY(-1px);filter:brightness(1.06)}
+  .btn:disabled{opacity:.55;cursor:not-allowed;transform:none;filter:none}
+  .btn.primary{
+    border-color: rgba(25,195,125,.55);
+    box-shadow: 0 0 0 2px rgba(25,195,125,.12) inset;
+  }
+  .btn.orange{
+    border-color: rgba(255,138,0,.65);
+    box-shadow: 0 0 0 2px rgba(255,138,0,.12) inset;
+  }
+  .btn.ghost{background:rgba(0,0,0,.10)}
+  .btn.exit{
+    background: linear-gradient(180deg, rgba(255,255,255,.22), rgba(255,255,255,.06)), #ff3b30;
+    border-color: rgba(255,59,48,.95);
+    box-shadow: 0 0 0 2px rgba(255,59,48,.18) inset;
+    color:#fff;
+    font-weight:800;
+  }
+  .btn.exit:hover{filter:brightness(1.05)}
+  .row{display:flex;gap:10px;flex-wrap:wrap;align-items:center}
+  .muted{color:var(--muted);font-size:13px;line-height:1.5}
+  .sep{height:1px;background:rgba(255,255,255,.12);margin:12px 0}
+  .stats{display:grid;grid-template-columns:1fr;gap:10px}
+  .stat{border:1px solid rgba(255,255,255,.12);border-radius:14px;padding:10px;background:rgba(0,0,0,.14)}
+  .stat .k{font-size:12px;color:var(--muted)}
+  .stat .v{font-size:18px;font-weight:800;margin-top:4px}
+  .screen{display:none}
+  .screen.active{display:block}
+  .qhead{display:flex;justify-content:space-between;gap:10px;flex-wrap:wrap;align-items:center}
+  .qleft{display:flex;align-items:center;gap:10px;flex-wrap:wrap}
+
+  .qnum{font-weight:800;font-size:22px}
+  .timer{font-variant-numeric:tabular-nums;font-size:20px}
+  .bar{height:10px;border-radius:999px;background:rgba(255,255,255,.10);overflow:hidden;border:1px solid rgba(255,255,255,.12)}
+  .bar > div{height:100%;width:100%;background:linear-gradient(90deg, var(--green), var(--orange))}
+  .qtext{margin-top:12px;font-size:22px;line-height:1.6;color:#fff}
+  .qtext, .qtext *{color:#fff !important}
+  .choice, .choice *{color:#fff !important}
+  .choice b{color:var(--orange2) !important}
+
+  .qtext img{max-height:122px;vertical-align:middle;filter:invert(1) brightness(1.9) contrast(2.2);image-rendering:-webkit-optimize-contrast;transform:translateZ(0);}
+.choices img{max-height:112px;vertical-align:middle;filter:invert(1) brightness(1.9) contrast(2.2);image-rendering:-webkit-optimize-contrast;transform:translateZ(0);}
+  .choices{display:grid;gap:10px;margin-top:12px}
+  .choice{
+    text-align:left;padding:16px 14px;border-radius:18px;
+    border:1px solid rgba(255,255,255,.14);
+    background:rgba(0,0,0,.12);
+    font-size:20px;line-height:1.4;
+  }
+  .choice:hover{border-color: rgba(255,177,74,.70)}
+  .choice.correct{border-color: rgba(25,195,125,.85); box-shadow: 0 0 0 2px rgba(25,195,125,.12) inset;}
+  .choice.wrong{border-color: rgba(255,77,79,.85); box-shadow: 0 0 0 2px rgba(255,77,79,.12) inset;}
+  .choice.disabled{pointer-events:none;opacity:.95}
+  .toast{margin-top:10px;font-size:14px}
+  .toast.good{color:var(--green)}
+  .toast.bad{color:var(--bad)}
+  .footer{text-align:center;margin-top:14px;color:rgba(234,244,255,.65);font-size:12px}
+
+  /* Player form */
+  .formGrid{display:grid; grid-template-columns: 1fr 1fr; gap:12px; margin:14px 0 6px;}
+  @media (max-width:700px){ .formGrid{grid-template-columns:1fr;} }
+  .field label{display:block; font-size:13px; color:var(--muted); margin:0 0 6px; font-weight:600;}
+  input.text{
+    width:100%;
+    padding:12px 12px;
+    border-radius:14px;
+    border:1px solid rgba(255,255,255,.18);
+    background: rgba(0,0,0,.12);
+    color: var(--text);
+    outline:none;
+    font-size:16px;
+  }
+  input.text:focus{border-color: rgba(255,138,0,.7); box-shadow:0 0 0 2px rgba(255,138,0,.12) inset;}
+  .warn{margin-top:8px; color:#ffd166; font-size:13px;}
+
+
+  .qright{display:flex;align-items:center;gap:10px}
+
+</style>
+
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/katex.min.css">
+<script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/katex.min.js"></script>
+<script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/contrib/auto-render.min.js"></script>
+
+<script src="https://cdn.jsdelivr.net/npm/xlsx@0.18.5/dist/xlsx.full.min.js"></script>
+</head>
+<body>
+<div class="wrap">
+  <div class="topbar">
+    <div class="title">
+      <h1>ÔN TẬP PHƯƠNG TRÌNH ĐƯỜNG THẲNG TRONG KHÔNG GIAN</h1>
+      <div class="sub">TẠO BỞI MR SANG</div>
+    </div>
+    <div class="pill">20 câu / lượt • 60 giây / câu</div>
+  </div>
+
+  <div class="grid">
+    <div class="card">
+      <div class="screen active" id="screenStart">
+        <audio id="introAudio" preload="auto" playsinline src="intro.mp3"></audio>
+
+        <div class="muted">
+          Nhấn <b>Bắt đầu</b> để chơi. Mỗi lượt gồm <b>20 câu</b> lấy ngẫu nhiên theo nhóm:
+          <b>Nhóm 1</b> lấy 5 câu, <b>Nhóm 2</b> lấy 5 câu, <b>Nhóm 3</b> lấy 10 câu.
+          Mỗi câu có <b>60 giây</b>.
+        </div>
+
+        <div class="sep"></div>
+
+        <div class="formGrid">
+          <div class="field">
+            <label for="playerName">Họ và tên</label>
+            <input class="text" id="playerName" type="text" placeholder="Nhập họ và tên..." autocomplete="off" />
+          </div>
+          <div class="field">
+            <label for="playerClass">Lớp</label>
+            <input class="text" id="playerClass" type="text" placeholder="Ví dụ: 12A1" autocomplete="off" />
+          </div>
+        </div>
+
+        <div class="warn" id="playerWarn" style="display:none">Vui lòng nhập đầy đủ <b>Họ và tên</b> và <b>Lớp</b> để bắt đầu.</div>
+
+        <div class="row">
+          <button class="btn primary" id="btnStart">Bắt đầu</button>
+          <button class="btn ghost" id="btnHow">Hướng dẫn</button>
+        </div>
+
+        <div class="toast muted" id="howText" style="display:none"></div>
+      </div>
+
+      <div class="screen" id="screenGame">
+        <div class="qhead">
+          <div class="qleft">
+            <div class="qnum" id="qNum">Câu 1/20</div>
+            <button class="btn exit" id="btnExit" type="button">Thoát</button>
+          </div>
+          <div class="qright">
+            <div class="timer" id="qTimer">01:00</div>
+          </div>
+        </div>
+        <div class="bar"><div id="timeBar"></div></div>
+
+        <div class="qtext" id="qText"></div>
+        <div class="choices" id="choices"></div>
+
+        <div class="toast" id="toast"></div>
+
+        <div class="sep"></div>
+        <div class="row">
+          <button class="btn ghost" id="btnPrev" disabled>← Câu trước</button>
+          <button class="btn orange" id="btnNext" disabled>Câu tiếp →</button>
+          <span class="muted" id="navHint">Chọn đáp án để mở nút “Câu tiếp”.</span>
+        </div>
+      </div>
+
+      <div class="screen" id="screenResult">
+        <div class="qhead">
+          <div class="qnum">Hoàn thành!</div>
+          <div class="pill" id="resultTime">—</div>
+        </div>
+        <div class="sep"></div>
+        <div class="stats">
+          <div class="stat"><div class="k">Tiến độ</div><div class="v" id="rProg">0/20</div></div>
+          <div class="stat"><div class="k">Số câu đúng</div><div class="v" id="rGood">0</div></div>
+          <div class="stat"><div class="k">Số câu sai</div><div class="v" id="rBad">0</div></div>
+          <div class="stat"><div class="k">Điểm (10)</div><div class="v" id="rScore">0</div></div>
+        </div>
+        <div class="sep"></div>
+        <div class="row">
+          <button class="btn primary" id="btnReplay">Chơi lượt mới</button>
+          <button class="btn orange" id="btnExport">Tải Excel kết quả</button>
+          <button class="btn ghost" id="btnReview">Xem lại</button>
+        </div>
+        <div class="toast muted" id="exportNote">Nhấn <b>Tải Excel kết quả</b> để tải file gửi giáo viên.</div>
+      </div>
+
+      <div class="footer">© ÔN TẬP PHƯƠNG TRÌNH ĐƯỜNG THẲNG TRONG KHÔNG GIAN - TẠO BỞI MR SANG</div>
+    </div>
+
+    <div class="card">
+      <div class="muted"><b>Thống kê lượt chơi</b></div>
+      <div class="sep"></div>
+      <div class="stats">
+        <div class="stat"><div class="k">Tiến độ</div><div class="v" id="sProg">0/20</div></div>
+        <div class="stat"><div class="k">Đúng</div><div class="v" id="sGood">0</div></div>
+        <div class="stat"><div class="k">Sai</div><div class="v" id="sBad">0</div></div>
+      </div>
+      <div class="sep"></div>
+      <div class="muted">
+        <b>Mẹo</b><br/>
+        • Nếu hết thời gian mà chưa chọn, hệ thống ghi nhận là <b>chưa chọn</b> và chuyển câu tiếp theo.<br/>
+        • Có thể quay lại câu trước để xem lại, nhưng không đổi đáp án sau khi đã chốt.
+      </div>
+      <div class="sep"></div>
+      <div class="row">
+        <button class="btn ghost" id="btnStop" disabled>Kết thúc sớm</button>
+        <button class="btn ghost" id="btnMute">Tắt âm</button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<script id="bank-json" type="application/json">{"title": "ÔN TẬP PHƯƠNG TRÌNH ĐƯỜNG THẲNG TRONG KHÔNG GIAN", "format": "katex_safe_v1", "questions": [{"id": "NHÓM1_Q01", "question": "Điểm nào sau đây thuộc đường thẳng ${d: \\begin{cases} x=1-t \\\\ y=2+3t \\\\ z=-3+2t \\end{cases}}$ ?", "choices": {"A": "${A(1; 2; -3)}$", "B": "${B(0; 5; -1)}$", "C": "${C(2; -1; -5)}$", "D": "${D(1; 3; 2)}$"}, "correct": "A", "group": "1"}, {"id": "NHÓM1_Q02", "question": "Điểm nào sau đây thuộc đường thẳng ${d: \\begin{cases} x=1-t \\\\ y=2+3t \\\\ z=-3+2t \\end{cases}}$ ?", "choices": {"A": "${A(1; 2; 0)}$", "B": "${B(0; 5; -1)}$", "C": "${C(2; -1; 5)}$", "D": "${D(1; 3; 2)}$"}, "correct": "B", "group": "1"}, {"id": "NHÓM1_Q03", "question": "Trong không gian ${Oxyz}$, cho đường thẳng ${d: \\begin{cases} x = 1 + 2t \\\\ y = 2 - t \\\\ z = 3t \\end{cases}}$. Điểm nào sau đây thuộc đường thẳng ${d}$ ?", "choices": {"A": "${A(1; 2; 0)}$", "B": "${B(3; 1; 3)}$", "C": "${C(0; 3; -3)}$", "D": "${D(2; 1; 3)}$"}, "correct": "A", "group": "1"}, {"id": "NHÓM1_Q04", "question": "Trong không gian ${Oxyz}$, cho đường thẳng ${d: \\dfrac{x-1}{2} = \\dfrac{y+2}{-1} = \\dfrac{z}{3}}$. Tìm tọa độ điểm ${M}$ trên ${d}$ sao cho ${M}$ có tung độ bằng ${0}$.", "choices": {"A": "${A(1; -2; 0)}$", "B": "${B(-3; 0; -6)}$", "C": "${C(3; 0; -6)}$", "D": "${D(-3; 0; 6)}$"}, "correct": "B", "group": "1"}, {"id": "NHÓM1_Q05", "question": "Trong không gian ${Oxyz}$, tính khoảng cách từ điểm ${M(1; 0; 1)}$ đến đường thẳng ${d: \\dfrac{x-1}{2} = \\dfrac{y}{1} = \\dfrac{z-2}{-2}}$.", "choices": {"A": "${\\dfrac{\\sqrt{5}}{3}}$", "B": "${\\dfrac{\\sqrt{6}}{3}}$", "C": "${\\dfrac{\\sqrt{2}}{3}}$", "D": "${\\dfrac{1}{3}}$"}, "correct": "A", "group": "1"}, {"id": "NHÓM1_Q06", "question": "Trong không gian ${Oxyz}$, tìm tọa độ hình chiếu vuông góc ${H}$ của điểm ${A(1; 2; 3)}$ lên đường thẳng ${d: \\dfrac{x-1}{2} = \\dfrac{y}{1} = \\dfrac{z-2}{1}}$.", "choices": {"A": "$H(2;\\dfrac{1}{2};\\dfrac{5}{2})$", "B": "$H(1;0;2)$", "C": "$H(3;1;3)$", "D": "$H(0;-\\dfrac{1}{2};\\dfrac{3}{2})$"}, "correct": "A", "group": "1"}, {"id": "NHÓM1_Q07", "question": "Trong không gian ${Oxyz}$, cho hai điểm ${A(1; 0; 1)}$ và ${B(-1; 2; 3)}$. Tìm tọa độ điểm ${M}$ trên trục ${Ox}$ sao cho ${MA = MB}$.", "choices": {"A": "$M(-3;0;0)$", "B": "$M(0;0;0)$", "C": "$M(3;0;0)$", "D": "$M(1;0;0)$"}, "correct": "A", "group": "1"}, {"id": "NHÓM1_Q08", "question": "Trong không gian ${Oxyz}$, tìm tọa độ điểm ${A'}$ đối xứng với điểm ${A(1; 2; 3)}$ qua trục ${Ox}$.", "choices": {"A": "${A'(1; -2; -3)}$", "B": "${A'(1; 2; -3)}$", "C": "${A'(1; -2; 3)}$", "D": "${A'(-1; -2; -3)}$"}, "correct": "A", "group": "1"}, {"id": "NHÓM1_Q09", "question": "Trong không gian ${Oxyz}$, cho đường thẳng ${d: \\begin{cases} x = 1 + t \\\\ y = -1 + 2t \\\\ z = 2 - t \\end{cases}}$. Tìm tọa độ điểm ${M}$ trên ${d}$ sao cho ${OM = \\sqrt{6}}$.", "choices": {"A": "$M(1;-1;2)$", "B": "$M(2;1;1)$", "C": "$M(0;-3;3)$", "D": "$M(1;1;2)$"}, "correct": "A", "group": "1"}, {"id": "NHÓM2_Q10", "question": "Trong không gian ${Oxyz}$, cho hai điểm ${A(1; -2; 3)}$ và ${B(3; 0; -1)}$. Một vectơ chỉ phương của đường thẳng ${AB}$ là:", "choices": {"A": "${A(2; 2; -4)}$", "B": "${B(4; -2; 2)}$", "C": "${C(-2; -2; -4)}$", "D": "${D(1; 1; 2)}$"}, "correct": "A", "group": "2"}, {"id": "NHÓM2_Q11", "question": "Trong không gian ${Oxyz}$, đường thẳng ${d}$ có phương trình tham số là ${\\left\\{ \\begin{array}{l} x = 1 + 2t \\\\ y = -3t \\\\ z = 4 - t \\end{array} \\right.}$. Một vectơ chỉ phương của đường thẳng ${d}$ là:", "choices": {"A": "${\\vec{u} = (1; 0; 4)}$", "B": "${\\vec{u} = (2; -3; -1)}$", "C": "${\\vec{u} = (1; -3; 4)}$", "D": "${\\vec{u} = (2; 0; -1)}$"}, "correct": "B", "group": "2"}, {"id": "NHÓM2_Q12", "question": "Trong không gian ${Oxyz}$, đường thẳng ${\\Delta}$ có phương trình chính tắc là ${\\dfrac{x-1}{2} = \\dfrac{y+3}{-1} = \\dfrac{z-2}{3}}$. Một vectơ chỉ phương của đường thẳng ${\\Delta}$ là:", "choices": {"A": "${\\vec{u} = (1; -3; 2)}$", "B": "${\\vec{u} = (2; -1; 3)}$", "C": "${\\vec{u} = (-1; 3; -2)}$", "D": "${\\vec{u} = (2; 1; 3)}$"}, "correct": "B", "group": "2"}, {"id": "NHÓM2_Q13", "question": "Trong không gian ${Oxyz}$, cho hai điểm ${A(1; 2; -1)}$ và ${B(3; 0; 2)}$. Một vectơ chỉ phương của đường thẳng ${AB}$ là:", "choices": {"A": "${\\overrightarrow{AB} = (2; -2; 3)}$", "B": "${\\overrightarrow{AB} = (4; 2; 1)}$", "C": "${\\overrightarrow{AB} = (-2; 2; -3)}$", "D": "${\\overrightarrow{AB} = (1; 0; 2)}$"}, "correct": "A", "group": "2"}, {"id": "NHÓM2_Q14", "question": "Trong không gian ${Oxyz}$, đường thẳng ${d}$ đi qua điểm ${M(1; -2; 3)}$ và song song với đường thẳng ${d': \\dfrac{x}{1} = \\dfrac{y+2}{3} = \\dfrac{z-1}{-2}}$. Một vectơ chỉ phương của đường thẳng ${d}$ là:", "choices": {"A": "${\\vec{u} = (1; -2; 3)}$", "B": "${\\vec{u} = (1; 3; -2)}$", "C": "${\\vec{u} = (0; -2; 1)}$", "D": "${\\vec{u} = (1; 2; -1)}$"}, "correct": "B", "group": "2"}, {"id": "NHÓM2_Q15", "question": "Trong không gian ${Oxyz}$, đường thẳng ${d}$ có một vectơ chỉ phương là ${\\vec{u} = (2; 4; -6)}$. Hỏi vectơ nào sau đây không phải là một vectơ chỉ phương của đường thẳng ${d}$ ?", "choices": {"A": "${\\vec{u_1} = (1; 2; -3)}$", "B": "${\\vec{u_2} = (-2; -4; 6)}$", "C": "${\\vec{u_3} = (4; 8; -12)}$", "D": "${\\vec{u_4} = (2; 4; 6)}$"}, "correct": "D", "group": "2"}, {"id": "NHÓM2_Q16", "question": "Trong không gian ${Oxyz}$, một đường thẳng song song với trục ${Oy}$ có một vectơ chỉ phương là:", "choices": {"A": "${\\vec{i} = (1; 0; 0)}$", "B": "${\\vec{j} = (0; 1; 0)}$", "C": "${\\vec{k} = (0; 0; 1)}$", "D": "${\\vec{u} = (1; 1; 0)}$"}, "correct": "B", "group": "2"}, {"id": "NHÓM2_Q17", "question": "Vectơ chỉ phương của đường thẳng ${d: \\dfrac{x-1}{2} = \\dfrac{y+3}{-1} = \\dfrac{z}{4}}$ là:", "choices": {"A": "${\\vec{u} = (2; -1; 4)}$", "B": "${\\vec{u} = (1; 3; 0)}$", "C": "${\\vec{u} = (-1; 3; 0)}$", "D": "${\\vec{u} = (-2; 1; -4)}$"}, "correct": "A", "group": "2"}, {"id": "NHÓM2_Q18", "question": "Trong không gian ${Oxyz}$, mặt phẳng ${(P)}$ có phương trình ${2x - 3y + z - 5 = 0}$. Một đường thẳng ${d}$ vuông góc với mặt phẳng ${(P)}$ sẽ có một vectơ chỉ phương là:", "choices": {"A": "${\\vec{u} = (2; -3; 1)}$", "B": "${\\vec{u} = (2; 3; 1)}$", "C": "${\\vec{u} = (-2; -3; 1)}$", "D": "${\\vec{u} = (1; -3; 2)}$"}, "correct": "A", "group": "2"}, {"id": "NHÓM2_Q19", "question": "Trong không gian ${Oxyz}$, đường thẳng ${d}$ là giao tuyến của hai mặt phẳng ${(P): x + y - z + 1 = 0}$ và ${(Q): 2x - y + 3z - 4 = 0}$. Một vectơ chỉ phương của đường thẳng ${d}$ là:", "choices": {"A": "${\\vec{u} = (2; -3; -1)}$", "B": "${\\vec{u} = (2; -5; -3)}$", "C": "${\\vec{u} = (3; 2; 1)}$", "D": "${\\vec{u} = (1; 2; 3)}$"}, "correct": "B", "group": "2"}, {"id": "NHÓM3_Q20", "question": "Trong không gian ${Oxyz}$, đường thẳng ${d}$ đi qua điểm ${A(2; 1; -3)}$ và có vectơ chỉ phương ${\\vec{u} = (-1; 2; 4)}$. Phương trình chính tắc của ${d}$ là:", "choices": {"A": "${\\dfrac{x-2}{-1} = \\dfrac{y-1}{2} = \\dfrac{z+3}{4}}$", "B": "${\\dfrac{x+1}{2} = \\dfrac{y-2}{1} = \\dfrac{z-4}{-3}}$", "C": "${\\dfrac{x-2}{1} = \\dfrac{y-1}{-2} = \\dfrac{z+3}{-4}}$", "D": "${\\dfrac{x+2}{-1} = \\dfrac{y+1}{2} = \\dfrac{z-3}{4}}$"}, "correct": "A", "group": "3"}, {"id": "NHÓM3_Q21", "question": "Trong không gian ${Oxyz}$, đường thẳng ${d}$ đi qua điểm ${A(1; -2; 4)}$ và có vectơ chỉ phương ${\\vec{u} = (-1; 3; 2)}$. Phương trình tham số của ${d}$ là:", "choices": {"A": "${\\left\\{ \\begin{array}{l} x = 1 + t \\\\ y = -2 - 3t \\\\ z = 4 - 2t \\end{array} \\right.}$", "B": "${\\left\\{ \\begin{array}{l} x = 1 - t \\\\ y = -2 + 3t \\\\ z = 4 + 2t \\end{array} \\right.}$", "C": "${\\left\\{ \\begin{array}{l} x = -1 + t \\\\ y = 3 - 2t \\\\ z = 2 + 4t \\end{array} \\right.}$", "D": "${\\left\\{ \\begin{array}{l} x = -1 - t \\\\ y = 3 + 3t \\\\ z = 2 + 2t \\end{array} \\right.}$"}, "correct": "B", "group": "3"}, {"id": "NHÓM3_Q22", "question": "Trong không gian ${Oxyz}$, viết phương trình đường thẳng ${\\Delta}$ đi qua điểm ${M(1; 2; -1)}$ và song song với đường thẳng ${d: \\dfrac{x}{1} = \\dfrac{y-1}{2} = \\dfrac{z+2}{-3}}$.", "choices": {"A": "${\\dfrac{x-1}{1} = \\dfrac{y-2}{2} = \\dfrac{z+1}{-3}}$", "B": "${\\dfrac{x+1}{1} = \\dfrac{y+2}{2} = \\dfrac{z-1}{-3}}$", "C": "${\\dfrac{x-1}{1} = \\dfrac{y-2}{2} = \\dfrac{z-1}{-3}}$", "D": "${\\dfrac{x}{1} = \\dfrac{y}{2} = \\dfrac{z}{-3}}$"}, "correct": "A", "group": "3"}, {"id": "NHÓM3_Q23", "question": "Trong không gian ${Oxyz}$, đường thẳng ${d}$ đi qua điểm ${M(1; -2; 3)}$ và có một vectơ chỉ phương ${\\vec{u} = (4; 5; -6)}$ có phương trình tham số là:", "choices": {"A": "${\\begin{cases} x=1+4t \\\\ y=-2+5t \\\\ z=3-6t \\end{cases}}$.", "B": "${\\begin{cases} x=4+t \\\\ y=5-2t \\\\ z=-6+3t \\end{cases}}$", "C": "${\\begin{cases} x=1+4t \\\\ y=2+5t \\\\ z=3+6t \\end{cases}}$", "D": "${\\begin{cases} x=1-4t \\\\ y=-2-5t \\\\ z=3+6t \\end{cases}}$"}, "correct": "A", "group": "3"}, {"id": "NHÓM3_Q24", "question": "Trong không gian ${Oxyz}$, đường thẳng ${\\Delta}$ đi qua điểm ${A(2; 1; -3)}$ và có một vectơ chỉ phương $\\vec{v}=(1;-2;1)$ có phương trình chính tắc là:", "choices": {"A": "${\\dfrac{x-2}{1} = \\dfrac{y-1}{-2} = z+3}$", "B": "${\\dfrac{x-1}{2} = \\dfrac{y+2}{1} = \\dfrac{z}{3}}$", "C": "$\\dfrac{x+2}{1}=\\dfrac{y+1}{-2}=\\dfrac{z-3}{1}$", "D": "$\\dfrac{x-2}{1}=\\dfrac{y-1}{-2}=\\dfrac{z-3}{1}$"}, "correct": "A", "group": "3"}, {"id": "NHÓM3_Q25", "question": "Trong không gian ${Oxyz}$, đường thẳng ${d}$ đi qua điểm ${A(1; 0; -2)}$ và song song với đường thẳng ${\\Delta: \\dfrac{x-1}{2} = \\dfrac{y+3}{-1} = \\dfrac{z}{3}}$ có phương trình tham số là:", "choices": {"A": "${\\begin{cases} x=1+2t \\\\ y=-t \\\\ z=-2+3t \\end{cases}}$", "B": "${\\begin{cases} x=2+t \\\\ y=-1z \\\\ z=3-2t \\end{cases}}$", "C": "${\\begin{cases} x=1-t \\\\ y=3t \\\\ z=-2 \\end{cases}}$", "D": "${\\begin{cases} x=1+t \\\\ y=-t \\\\ z=-2+3t \\end{cases}}$"}, "correct": "A", "group": "3"}, {"id": "NHÓM3_Q26", "question": "Trong không gian ${Oxyz}$, đường thẳng ${\\Delta}$ đi qua điểm ${M(1; -1; 2)}$ và vuông góc với mặt phẳng ${(P): x+2y-3z+4=0}$ có phương trình chính tắc là:", "choices": {"A": "${\\dfrac{x-1}{1} = \\dfrac{y+1}{2} = \\dfrac{z-2}{-3}}$", "B": "${\\dfrac{x-1}{1} = \\dfrac{y+1}{2} = \\dfrac{z-2}{3}}$", "C": "${\\dfrac{x+1}{1} = \\dfrac{y-1}{2} = \\dfrac{z+2}{-3}}$", "D": "${\\dfrac{x-1}{2} = \\dfrac{y+1}{-3} = \\dfrac{z-2}{1}}$"}, "correct": "A", "group": "3"}, {"id": "NHÓM3_Q27", "question": "Trong không gian ${Oxyz}$, cho điểm ${I(1; 2; -3)}$ và đường thẳng ${d: \\begin{cases} x=2+t \\\\ y=-1+2t \\\\ z=3-t \\end{cases}}$. Phương trình của đường thẳng ${\\Delta}$ đi qua ${I}$ và song song với ${d}$ là:", "choices": {"A": "${\\begin{cases} x=1+t \\\\ y=2+2t \\\\ z=-3-t \\end{cases}}$", "B": "${\\begin{cases} x=2+t \\\\ y=-1+2t \\\\ z=3-3t \\end{cases}}$", "C": "${\\begin{cases} x=1-t \\\\ y=2-2t \\\\ z=-3+t \\end{cases}}$", "D": "${\\begin{cases} x=1+t \\\\ y=2+2t \\\\ z=-3-t \\end{cases}}$"}, "correct": "D", "group": "3"}, {"id": "NHÓM3_Q28", "question": "Trong không gian ${Oxyz}$, cho mặt phẳng ${(P): x-2y+3z-5=0}$. Đường thẳng ${d}$ đi qua gốc tọa độ ${O(0; 0; 0)}$ và vuông góc với mặt phẳng ${(P)}$ có phương trình chính tắc là:", "choices": {"A": "${\\dfrac{x}{1} = \\dfrac{y}{-2} = \\dfrac{z}{3}}$", "B": "$\\dfrac{x-1}{1}=\\dfrac{y+2}{-2}=\\dfrac{z-3}{3}$", "C": "$\\dfrac{x}{-1}=\\dfrac{y}{2}=\\dfrac{z}{-3}$", "D": "${\\dfrac{x-1}{1} = \\dfrac{y+2}{-2} = \\dfrac{z-3}{3}}$"}, "correct": "A", "group": "3"}, {"id": "NHÓM3_Q29", "question": "Trong không gian ${Oxyz}$, giao tuyến của hai mặt phẳng ${(P): x-y+z-1=0}$ và ${(Q): 2x+y+z+2=0}$ là đường thẳng có một vectơ chỉ phương là:", "choices": {"A": "${\\vec{u} = (-2; 1; 3)}$", "B": "${\\vec{u} = (1; -1; 1)}$", "C": "${\\vec{u} = (2; 1; 1)}$", "D": "${\\vec{u} = (1; 1; -1)}$"}, "correct": "A", "group": "3"}, {"id": "NHÓM3_Q30", "question": "Trong không gian ${Oxyz}$, viết phương trình đường thẳng đi qua hai điểm ${A(1; 2; -1)}$ và ${B(2; 1; 3)}$.", "choices": {"A": "${d: \\dfrac{x-1}{1} = \\dfrac{y-2}{-1} = \\dfrac{z+1}{4}}$.", "B": "${d: \\dfrac{x+1}{1} = \\dfrac{y+2}{-1} = \\dfrac{z-1}{4}}$.", "C": "${d: \\dfrac{x-2}{1} = \\dfrac{y-1}{1} = \\dfrac{z-3}{4}}$.", "D": "${d: \\dfrac{x-1}{3} = \\dfrac{y-2}{3} = \\dfrac{z+1}{2}}$."}, "correct": "A", "group": "3"}, {"id": "NHÓM3_Q31", "question": "Trong không gian ${Oxyz}$, viết phương trình đường thẳng $d$ đi qua điểm ${M(1; -2; 3)}$ và có vectơ chỉ phương ${\\vec{u} = (2; 1; -1)}$.", "choices": {"A": "${d: \\dfrac{x-1}{2} = \\dfrac{y+2}{1} = \\dfrac{z-3}{-1}}$.", "B": "${d: \\dfrac{x+1}{2} = \\dfrac{y-2}{1} = \\dfrac{z+3}{-1}}$.", "C": "${d: \\dfrac{x-2}{1} = \\dfrac{y-1}{-2} = \\dfrac{z+1}{3}}$.", "D": "${d: \\dfrac{x+2}{1} = \\dfrac{y+1}{-2} = \\dfrac{z-1}{3}}$."}, "correct": "A", "group": "3"}, {"id": "NHÓM3_Q32", "question": "Trong không gian ${Oxyz}$, viết phương trình đường thẳng đi qua điểm ${M(0; 1; -2)}$ và song song với đường thẳng ${d': \\dfrac{x-1}{2} = \\dfrac{y}{1} = \\dfrac{z+3}{-1}}$.", "choices": {"A": "${d: \\dfrac{x}{2} = \\dfrac{y-1}{1} = \\dfrac{z+2}{-1}}$.", "B": "${d: \\dfrac{x-1}{2} = \\dfrac{y}{1} = \\dfrac{z+3}{-1}}$.", "C": "$d:\\dfrac{x}{-2}=\\dfrac{y-1}{1}=\\dfrac{z+2}{-1}$.", "D": "$d:\\dfrac{x}{2}=\\dfrac{y+1}{1}=\\dfrac{z-2}{-1}$."}, "correct": "A", "group": "3"}, {"id": "NHÓM3_Q33", "question": "Trong không gian ${Oxyz}$, viết phương trình đường thẳng đi qua điểm ${A(1; 2; -3)}$ và vuông góc với mặt phẳng ${(P): x + 2y - z + 5 = 0}$.", "choices": {"A": "${d: \\dfrac{x-1}{1} = \\dfrac{y-2}{2} = \\dfrac{z+3}{-1}}$.", "B": "${d: \\dfrac{x+1}{1} = \\dfrac{y+2}{2} = \\dfrac{z-3}{-1}}$.", "C": "${d: \\dfrac{x-1}{1} = \\dfrac{y-2}{2} = \\dfrac{z-3}{-1}}$.", "D": "${d: \\dfrac{x-1}{-1} = \\dfrac{y-2}{-2} = \\dfrac{z+3}{1}}$."}, "correct": "A", "group": "3"}, {"id": "NHÓM3_Q34", "question": "Trong không gian ${Oxyz}$, viết phương trình đường thẳng đi qua điểm ${M(1; 0; -1)}$ và vuông góc với cả hai vectơ ${\\vec{a} = (1; 2; 1)}$ và ${\\vec{b} = (2; -1; 3)}$.", "choices": {"A": "${d: \\dfrac{x-1}{7} = \\dfrac{y}{-1} = \\dfrac{z+1}{-5}}$.", "B": "${d: \\dfrac{x-1}{7} = \\dfrac{y}{1} = \\dfrac{z+1}{5}}$.", "C": "${d: \\dfrac{x+1}{7} = \\dfrac{y}{1} = \\dfrac{z-1}{5}}$.", "D": "${d: \\dfrac{x-1}{-1} = \\dfrac{y}{7} = \\dfrac{z+1}{-5}}$."}, "correct": "A", "group": "3"}, {"id": "NHÓM3_Q35", "question": "Trong không gian ${Oxyz}$, viết phương trình đường thẳng ${d}$ là giao tuyến của hai mặt phẳng ${(P): x + y - z + 1 = 0}$ và ${(Q): 2x - y + z - 3 = 0}$.", "choices": {"A": "${d: \\begin{cases} x = \\dfrac{2}{3} \\\\ y = -\\dfrac{5}{3} + t \\\\ z = t \\end{cases}}$", "B": "${d: \\begin{cases} x = 2 + t \\\\ y = -5 + t \\\\ z = 3t \\end{cases}}$", "C": "$d:\\dfrac{x-2/3}{1}=\\dfrac{y+5/3}{-1}=\\dfrac{z}{1}$.", "D": "$d:\\dfrac{x-2/3}{-1}=\\dfrac{y+5/3}{1}=\\dfrac{z}{1}$."}, "correct": "A", "group": "3"}, {"id": "NHÓM3_Q36", "question": "Trong không gian ${Oxyz}$, viết phương trình tham số của đường thẳng đi qua điểm ${A(2; -1; 4)}$ và song song với trục ${Oy}$.", "choices": {"A": "${d: \\begin{cases} x = 2 \\\\ y = -1 + t \\\\ z = 4 \\end{cases}}$", "B": "${d: \\begin{cases} x = 2 + t \\\\ y = -1 \\\\ z = 4 \\end{cases}}$", "C": "${d: \\begin{cases} x = 2 \\\\ y = -1 \\\\ z = 4 + t \\end{cases}}$", "D": "$d:\\dfrac{x-2}{2}=\\dfrac{y+1}{1}=\\dfrac{z-4}{1}$."}, "correct": "A", "group": "3"}, {"id": "NHÓM3_Q37", "question": "Trong không gian ${Oxyz}$, viết phương trình chính tắc của đường thẳng đi qua điểm ${A(1; 1; -2)}$ và có vectơ chỉ phương ${\\vec{u}}$ là vectơ pháp tuyến của mặt phẳng ${(P): 2x - y + 3z - 4 = 0}$.", "choices": {"A": "${d: \\dfrac{x-1}{2} = \\dfrac{y-1}{-1} = \\dfrac{z+2}{3}}$.", "B": "${d: \\dfrac{x-2}{1} = \\dfrac{y+1}{1} = \\dfrac{z-3}{-2}}$.", "C": "${d: \\dfrac{x+1}{2} = \\dfrac{y+1}{-1} = \\dfrac{z-2}{3}}$.", "D": "${d: \\dfrac{x-1}{-2} = \\dfrac{y-1}{1} = \\dfrac{z+2}{-3}}$."}, "correct": "A", "group": "3"}, {"id": "NHÓM3_Q38", "question": "Trong không gian ${Oxyz}$, cho đường thẳng ${d}$ có phương trình tham số ${d: \\begin{cases} x = 1 + 2t \\\\ y = 2 - t \\\\ z = 3 + 3t \\end{cases}}$. Viết phương trình chính tắc của đường thẳng ${d}$.", "choices": {"A": "${d: \\dfrac{x-1}{2} = \\dfrac{y-2}{-1} = \\dfrac{z-3}{3}}$.", "B": "${d: \\dfrac{x+1}{2} = \\dfrac{y+2}{-1} = \\dfrac{z+3}{3}}$.", "C": "${d: \\dfrac{x-2}{1} = \\dfrac{y+1}{2} = \\dfrac{z-3}{3}}$.", "D": "${d: \\dfrac{x-1}{1} = \\dfrac{y-2}{2} = \\dfrac{z-3}{3}}$."}, "correct": "A", "group": "3"}, {"id": "NHÓM3_Q39", "question": "Trong không gian ${Oxyz}$, viết phương trình tham số của đường thẳng đi qua gốc tọa độ ${O(0; 0; 0)}$ và song song với đường thẳng đi qua hai điểm ${A(1; 2; 0)}$ và ${B(0; 1; -1)}$.", "choices": {"A": "${d: \\begin{cases} x = -t \\\\ y = -t \\\\ z = -t \\end{cases}}$", "B": "${d: \\begin{cases} x = t \\\\ y = t \\\\ z = t \\end{cases}}$", "C": "${d: \\begin{cases} x = 1 - t \\\\ y = 2 - t \\\\ z = -t \\end{cases}}$", "D": "${d: \\begin{cases} x = t \\\\ y = -t \\\\ z = t \\end{cases}}$"}, "correct": "A", "group": "3"}], "groups": {"1": {"pick": 5}, "2": {"pick": 5}, "3": {"pick": 10}}}</script>
+
+<script>
+(() => {
+  "use strict";
+
+  const TOTAL_PER_GAME = 20;
+  const SECONDS_PER_Q = 60;
+
+  const $ = (id)=>document.getElementById(id);
+  const screenStart  = $("screenStart");
+  const screenGame   = $("screenGame");
+  const screenResult = $("screenResult");
+
+  const btnStart = $("btnStart");
+  const btnHow   = $("btnHow");
+  const howText  = $("howText");
+
+  const playerName  = $("playerName");
+  const playerClass = $("playerClass");
+  const playerWarn  = $("playerWarn");
+
+  const qNum   = $("qNum");
+  const qTimer = $("qTimer");
+  const timeBar= $("timeBar");
+  const qText  = $("qText");
+  const choices= $("choices");
+  const toast  = $("toast");
+
+  const btnPrev = $("btnPrev");
+  const btnNext = $("btnNext");
+  const btnExit = $("btnExit");
+  const btnStop = $("btnStop");
+  const btnMute = $("btnMute");
+  const navHint = $("navHint");
+
+  const sProg = $("sProg");
+  const sGood = $("sGood");
+  const sBad  = $("sBad");
+
+  const rProg  = $("rProg");
+  const rGood  = $("rGood");
+  const rBad   = $("rBad");
+  const rScore = $("rScore");
+  const resultTime = $("resultTime");
+
+  const btnReplay = $("btnReplay");
+  const btnExport = $("btnExport");
+  const btnReview = $("btnReview");
+
+  function show(screen){
+    [screenStart, screenGame, screenResult].forEach(s=>s.classList.remove("active"));
+    screen.classList.add("active");
+  }
+
+  function renderMathIn(root){
+    if(!window.renderMathInElement) return;
+    try {
+      window.renderMathInElement(root, {
+        delimiters: [
+          {left: "$$", right: "$$", display: true},
+          {left: "$", right: "$", display: false},
+          {left: "\\(", right: "\\)", display: false},
+          {left: "\\[", right: "\\]", display: true},
+        ],
+        throwOnError: false
+      });
+    } catch(e) {}
+  }
+
+  const obs = new MutationObserver(()=>{
+    renderMathIn(qText);
+    renderMathIn(choices);
+  });
+  obs.observe(qText, {childList:true, subtree:true, characterData:true});
+  obs.observe(choices, {childList:true, subtree:true, characterData:true});
+
+  // Intro
+  const introAudio = $("introAudio");
+  let introArmed = true;
+
+  function tryPlayIntro(){
+    if(!introAudio) return;
+    try {
+      introAudio.muted = false;
+      introAudio.volume = 1;
+      introAudio.currentTime = 0;
+      const p = introAudio.play();
+      if(p && p.catch) p.catch(()=>{});
+    } catch(e) {}
+  }
+  function stopIntro(){
+    if(!introAudio) return;
+    try { introAudio.pause(); } catch(e) {}
+    try { introAudio.currentTime = 0; } catch(e) {}
+  }
+  function firstGesture(){
+    if(!introArmed) return;
+    introArmed = false;
+    tryPlayIntro();
+    document.removeEventListener("pointerdown", firstGesture, true);
+    document.removeEventListener("touchstart", firstGesture, true);
+    document.removeEventListener("keydown", firstGesture, true);
+  }
+  document.addEventListener("pointerdown", firstGesture, true);
+  document.addEventListener("touchstart", firstGesture, true);
+  document.addEventListener("keydown", firstGesture, true);
+
+  // Beep
+  let audioOn = true;
+  let audioCtx = null;
+  function getCtx(){
+    const AC = window.AudioContext || window.webkitAudioContext;
+    if(!AC) return null;
+    audioCtx = audioCtx || new AC();
+    try { if(audioCtx.state==="suspended") audioCtx.resume(); } catch(e) {}
+    return audioCtx;
+  }
+  function beep(){
+    if(!audioOn) return;
+    const ctx = getCtx();
+    if(!ctx) return;
+    try {
+      const o = ctx.createOscillator();
+      const g = ctx.createGain();
+      o.type = "sine";
+      o.frequency.value = 880;
+      g.gain.value = 0.08;
+      o.connect(g); g.connect(ctx.destination);
+      o.start();
+      o.stop(ctx.currentTime + 0.12);
+    } catch(e) {}
+  }
+
+  // Âm thanh đúng/sai (giống phong cách game mẫu: WebAudio, không cần file)
+  function soundCorrect(){
+    if(!audioOn) return;
+    const ctx = getCtx();
+    if(!ctx) return;
+    try{
+      const o1 = ctx.createOscillator();
+      const o2 = ctx.createOscillator();
+      const g  = ctx.createGain();
+      g.gain.value = 0.09;
+
+      o1.type = "sine";
+      o2.type = "sine";
+      o1.frequency.value = 880;   // A5
+      o2.frequency.value = 1320;  // E6
+
+      o1.connect(g); o2.connect(g); g.connect(ctx.destination);
+
+      const t = ctx.currentTime;
+      o1.start(t);
+      o2.start(t + 0.03);
+      o1.stop(t + 0.14);
+      o2.stop(t + 0.18);
+    }catch(e){}
+  }
+
+  function soundWrong(){
+    if(!audioOn) return;
+    const ctx = getCtx();
+    if(!ctx) return;
+    try{
+      const o = ctx.createOscillator();
+      const g = ctx.createGain();
+      o.type = "square";
+      o.frequency.value = 220; // trầm hơn
+      g.gain.value = 0.08;
+      o.connect(g); g.connect(ctx.destination);
+      const t = ctx.currentTime;
+      o.start(t);
+      o.frequency.setValueAtTime(220, t);
+      o.frequency.linearRampToValueAtTime(140, t + 0.12);
+      o.stop(t + 0.16);
+    }catch(e){}
+  }
+
+  function readBankSync(){
+    const el = $("bank-json");
+    if(!el) return null;
+    try { return JSON.parse(el.textContent); } catch(e) { return null; }
+  }
+
+  function shuffle(arr){
+    const a = arr.slice();
+    for(let i=a.length-1;i>0;i--) {
+      const j = Math.floor(Math.random()*(i+1));
+      [a[i],a[j]] = [a[j],a[i]];
+    }
+    return a;
+  }
+
+  function pickQuestions(bank){
+    const qs = Array.isArray(bank.questions) ? bank.questions : [];
+    const groups = bank.groups || {};
+
+    const picked = [];
+    const gids = Object.keys(groups).sort((a,b)=>Number(a)-Number(b));
+    for(const gid of gids){
+      const k = Number(groups[gid]?.pick || 0);
+      const pool = qs.filter(q => String(q.group) === String(gid));
+      picked.push(...shuffle(pool).slice(0, Math.min(k, pool.length)));
+    }
+    return shuffle(picked).slice(0, Math.min(TOTAL_PER_GAME, picked.length));
+  }
+
+  let game = null;
+  let tick = null;
+  let lastBeepSecond = null;
+  let reviewMode = false;
+
+  function pad2(n){ return String(n).padStart(2,'0'); }
+  function stopTimer(){ if(tick) { clearInterval(tick); tick=null; } }
+
+  function stats(){
+    let done=0, good=0, bad=0;
+    for(const it of game.items){
+      if(it.chosen !== null){
+        done++;
+        if(it.chosen === it.correct) good++;
+        else bad++;
+      }
+    }
+    return {done, good, bad};
+  }
+
+  function renderStats(){
+    const st = game ? stats() : {done:0, good:0, bad:0};
+    const total = game ? game.items.length : TOTAL_PER_GAME;
+    sProg.textContent = st.done + "/" + total;
+    sGood.textContent = String(st.good);
+    sBad.textContent  = String(st.bad);
+  }
+
+  function renderTimer(sec){
+    const t = Math.max(0, Math.ceil(sec));
+    const mm = Math.floor(t/60);
+    const ss = t % 60;
+    qTimer.textContent = pad2(mm) + ":" + pad2(ss);
+    const pct = (sec/SECONDS_PER_Q)*100;
+    timeBar.style.width = Math.max(0, Math.min(100, pct)) + "%";
+  }
+
+  function startTimer(){
+    stopTimer();
+    tick = setInterval(()=>{
+      if(!game || game.finished || reviewMode) return;
+      const it = game.items[game.index];
+      if(it.locked) return;
+
+      it.timeLeft -= 0.1;
+      const sec = Math.ceil(it.timeLeft);
+
+      if(audioOn && sec <= 5 && sec > 0 && sec !== lastBeepSecond){
+        beep();
+        lastBeepSecond = sec;
+      }
+
+      if(it.timeLeft <= 0){
+        it.timeLeft = 0;
+        onTimeout();
+        return;
+      }
+      renderTimer(it.timeLeft);
+    }, 100);
+  }
+
+  function buildGame(bank){
+    const picked = pickQuestions(bank);
+    const items = picked.map((q, idx) => {
+      const options = q.choices || q.options || {};
+      return {
+        id: q.id ?? (idx+1),
+        group: q.group,
+        q: q.question || "",
+        options: {
+          A: options.A || "",
+          B: options.B || "",
+          C: options.C || "",
+          D: options.D || ""
+        },
+        correct: (q.correct || "").toString().trim() || "A",
+        chosen: null,
+        locked: false,
+        timeLeft: SECONDS_PER_Q,
+        spent: 0
+      };
+    });
+    return {
+      startAt: Date.now(),
+      endAt: null,
+      index: 0,
+      items,
+      finished: false,
+      playerName: "",
+      playerClass: ""
+    };
+  }
+
+  function markChoices(it){
+    const nodes = [...choices.children];
+    const letters = ["A","B","C","D"];
+    nodes.forEach((node, idx)=>{
+      node.classList.remove("correct","wrong","disabled");
+      const L = letters[idx];
+      if(it.locked) node.classList.add("disabled");
+      if(L===it.correct) node.classList.add("correct");
+      if(it.chosen && L===it.chosen && it.chosen!==it.correct) node.classList.add("wrong");
+    });
+  }
+
+  function renderQuestion(){
+    const total = game.items.length;
+    if(!total || game.index >= total){ finishGame(true); return; }
+    const it = game.items[game.index];
+
+    qNum.textContent = "Câu " + (game.index+1) + "/" + total;
+    toast.textContent = "";
+    toast.className = "toast";
+
+    btnPrev.disabled = (game.index===0);
+    btnNext.disabled = !it.locked;
+    navHint.textContent = it.locked ? "Đã chốt. Bấm “Câu tiếp” để qua câu mới." : "Chọn đáp án để chốt.";
+
+    qText.innerHTML = it.q;
+    choices.innerHTML = "";
+
+    const letters = ["A","B","C","D"];
+    for(const L of letters){
+      const b = document.createElement("button");
+      b.className = "btn choice";
+      b.type = "button";
+      b.innerHTML = "<b style='margin-right:10px;color:var(--orange2)'>" + L + ".</b> <span>" + (it.options[L]||"") + "</span>";
+      if(it.locked) b.classList.add("disabled");
+      b.addEventListener("click", ()=>choose(L));
+      choices.appendChild(b);
+    }
+
+    renderTimer(it.timeLeft);
+    if(it.locked) markChoices(it);
+    renderStats();
+    renderMathIn(qText);
+    renderMathIn(choices);
+  }
+
+  function lockAndMaybeFinish(){
+    btnNext.disabled = false;
+    if(game.index === game.items.length - 1){
+      setTimeout(()=>finishGame(false), 600);
+    }
+  }
+
+  function choose(letter){
+    if(!game || game.finished || reviewMode) return;
+    const it = game.items[game.index];
+    if(it.locked) return;
+
+    it.chosen = letter;
+    it.locked = true;
+    it.spent = Math.max(0, SECONDS_PER_Q - it.timeLeft);
+
+    if(letter === it.correct){ toast.textContent = "✅ Chính xác!"; toast.className="toast good"; soundCorrect(); }
+    else { toast.textContent="❌ Chưa đúng."; toast.className="toast bad"; soundWrong(); }
+
+    markChoices(it);
+    renderStats();
+    lockAndMaybeFinish();
+
+    const idx = game.index;
+    if(idx < game.items.length - 1){
+      setTimeout(()=>{
+        if(!game || game.finished || reviewMode) return;
+        if(game.index !== idx) return;
+        next();
+      }, 900);
+    }
+  }
+
+  function onTimeout(){
+    const it = game.items[game.index];
+    if(it.locked || reviewMode) return;
+
+    it.chosen = "—";
+    it.locked = true;
+    it.spent = SECONDS_PER_Q;
+
+    toast.textContent = "⏱️ Hết giờ!";
+    toast.className = "toast bad";
+
+    markChoices(it);
+    renderStats();
+    lockAndMaybeFinish();
+
+    const idx = game.index;
+    if(idx < game.items.length - 1){
+      setTimeout(()=>{
+        if(!game || game.finished || reviewMode) return;
+        if(game.index !== idx) return;
+        next();
+      }, 900);
+    }
+  }
+
+  function next(){
+    if(!game) return;
+    if(game.index < game.items.length - 1){ game.index++; lastBeepSecond=null; renderQuestion(); }
+    else finishGame(false);
+  }
+  function prev(){ if(game && game.index>0){ game.index--; renderQuestion(); } }
+
+  function finishGame(endedEarly){
+    if(!game || game.finished) return;
+    stopTimer();
+    game.endAt = Date.now();
+    game.finished = true;
+
+    const st = stats();
+    const total = game.items.length || TOTAL_PER_GAME;
+    const score10 = total ? Math.round((st.good / total) * 10 * 100) / 100 : 0;
+
+    rProg.textContent = st.done + "/" + total;
+    rGood.textContent = st.good;
+    rBad.textContent  = st.bad;
+    rScore.textContent= score10;
+
+    const totalSec = Math.round((game.endAt - game.startAt)/1000);
+    const mm = Math.floor(totalSec/60), ss = totalSec%60;
+    resultTime.textContent = "Thời gian: " + mm + "m " + ss + "s";
+
+    btnStop.disabled = true;
+    show(screenResult);
+    renderStats();
+  }
+
+  function _safeFilename(s){
+    try {
+      return (s||"").toString()
+        .normalize("NFD").replace(/[\u0300-\u036f]/g,"")
+        .replace(/[^a-zA-Z0-9]+/g,"_")
+        .replace(/^_+|_+$/g,"")
+        .slice(0,40) || "HocSinh";
+    } catch(e) { return "HocSinh"; }
+  }
+  function _htmlToText(s){
+    return (s||"").toString()
+      .replace(/<img[^>]*>/gi,"[CT]")
+      .replace(/<br\s*\/?>/gi,"\n")
+      .replace(/<\/p>/gi,"\n")
+      .replace(/<[^>]*>/g,"")
+      .replace(/&nbsp;/g," ")
+      .replace(/&amp;/g,"&")
+      .replace(/\n{3,}/g,"\n\n")
+      .replace(/[ \t]{2,}/g," ")
+      .trim();
+  }
+  function exportExcel(){
+    if(!game || !game.finished) return;
+    const st = stats();
+    const total = game.items.length || TOTAL_PER_GAME;
+    const score10 = total ? Math.round((st.good / total) * 10 * 100) / 100 : 0;
+    const totalSec = Math.round((game.endAt - game.startAt)/1000);
+
+    const now = new Date(game.endAt || Date.now());
+    const stamp = now.toISOString().slice(0,19).replace(/[:T]/g,"-");
+    const fn = "Ket_qua_" + _safeFilename(game.playerName) + "_" + _safeFilename(game.playerClass) + "_" + stamp + ".xlsx";
+
+    if(window.XLSX){
+      const summaryAOA = [
+        ["ÔN TẬP PHƯƠNG TRÌNH ĐƯỜNG THẲNG TRONG KHÔNG GIAN - TẠO BỞI MR SANG"],
+        ["Họ và tên", game.playerName || ""],
+        ["Lớp", game.playerClass || ""],
+        ["Bắt đầu", new Date(game.startAt).toLocaleString("vi-VN")],
+        ["Kết thúc", new Date(game.endAt).toLocaleString("vi-VN")],
+        ["Thời gian làm (giây)", totalSec],
+        ["Số câu", total],
+        ["Đúng", st.good],
+        ["Sai", st.bad],
+        ["Điểm (10)", score10],
+      ];
+      const ws1 = XLSX.utils.aoa_to_sheet(summaryAOA);
+
+      const header = ["STT","ID","Nhóm","Câu hỏi","A","B","C","D","Đáp án đúng","Đã chọn","Kết quả","Thời gian (giây)"];
+      const rows = [header];
+      for(let i=0;i<game.items.length;i++) {
+        const it = game.items[i];
+        const chosen = (it.chosen===null) ? "" : it.chosen;
+        const result = it.correct ? ((chosen===it.correct) ? "Đúng" : "Sai") : "—";
+        const spent = (typeof it.spent === "number") ? Math.round(it.spent) : "";
+        rows.push([
+          i+1, it.id, it.group,
+          _htmlToText(it.q),
+          _htmlToText(it.options.A),
+          _htmlToText(it.options.B),
+          _htmlToText(it.options.C),
+          _htmlToText(it.options.D),
+          it.correct || "",
+          chosen,
+          result,
+          spent
+        ]);
+      }
+      const ws2 = XLSX.utils.aoa_to_sheet(rows);
+
+      const wb = XLSX.utils.book_new();
+      XLSX.utils.book_append_sheet(wb, ws1, "Tong_quan");
+      XLSX.utils.book_append_sheet(wb, ws2, "Chi_tiet");
+      XLSX.writeFile(wb, fn);
+    } else {
+      alert("Thiếu thư viện XLSX (cần Internet để tải).");
+    }
+  }
+
+  btnHow.addEventListener("click", ()=>{
+    howText.style.display = (howText.style.display==="none") ? "" : "none";
+    howText.textContent = "Chọn 1 đáp án (A–D). Mỗi câu 60 giây. 5 giây cuối có báo động.";
+  });
+
+  btnStart.addEventListener("click", ()=>{
+    const name = (playerName?.value || "").trim();
+    const cls  = (playerClass?.value || "").trim();
+    if(!name || !cls){
+      playerWarn.style.display = "";
+      (!name ? playerName : playerClass)?.focus?.();
+      return;
+    }
+    playerWarn.style.display = "none";
+    try { getCtx(); } catch(e) {}
+    stopIntro();
+
+    const bank = readBankSync();
+    if(!bank){ alert("Không đọc được kho câu hỏi."); return; }
+    game = buildGame(bank);
+    game.playerName = name;
+    game.playerClass = cls;
+
+    lastBeepSecond = null;
+    reviewMode = false;
+    show(screenGame);
+    btnStop.disabled = false;
+    renderQuestion();
+    startTimer();
+  });
+
+  btnPrev.addEventListener("click", prev);
+  btnNext.addEventListener("click", next);
+  btnStop.addEventListener("click", ()=>{ if(game) finishGame(true); });
+
+  btnMute.addEventListener("click", ()=>{ audioOn = !audioOn; btnMute.textContent = audioOn ? "Tắt âm" : "Bật âm"; });
+
+  btnExit.addEventListener("click", ()=>{
+    const ok = confirm("Bạn muốn thoát? Tiến trình hiện tại sẽ không được tính.");
+    if(!ok) return;
+    stopTimer();
+    stopIntro();
+    game = null;
+    reviewMode = false;
+    show(screenStart);
+    btnStop.disabled = true;
+  });
+
+  btnReplay.addEventListener("click", ()=>{
+    const name = (playerName?.value || game?.playerName || "").trim();
+    const cls  = (playerClass?.value || game?.playerClass || "").trim();
+    if(!name || !cls){ show(screenStart); return; }
+    stopIntro();
+
+    const bank = readBankSync();
+    if(!bank){ alert("Không đọc được kho câu hỏi."); return; }
+    game = buildGame(bank);
+    game.playerName = name;
+    game.playerClass = cls;
+
+    lastBeepSecond = null;
+    reviewMode = false;
+    show(screenGame);
+    btnStop.disabled = false;
+    renderQuestion();
+    startTimer();
+  });
+
+  btnExport.addEventListener("click", exportExcel);
+
+  btnReview.addEventListener("click", ()=>{
+    if(!game) return;
+    reviewMode = true;
+    stopTimer();
+    game.index = 0;
+    show(screenGame);
+    renderQuestion();
+    toast.textContent = "🔎 Xem lại (không chạy đồng hồ).";
+    toast.className = "toast muted";
+  });
+
+  window.addEventListener("load", ()=>{ renderMathIn(document.body); });
+})();
+</script>
+</body>
+</html>
